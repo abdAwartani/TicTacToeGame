@@ -151,9 +151,12 @@ namespace TicTakTokGame
             Oplayer = OPlayerCounter > XPlayerCounter ? true : false;
             CPUTrun = !IsCPU ? false : !Oplayer;
             lblTurnPlayer.Text = Oplayer ? "O Player" : "X Player";
-            x1.Enabled = x2.Enabled = x3.Enabled = y1.Enabled = y2.Enabled = y3.Enabled = z1.Enabled = z2.Enabled = z3.Enabled = true;
-            x1.Text = x2.Text = x3.Text = y1.Text = y2.Text = y3.Text = z1.Text = z2.Text = z3.Text = "";
-            x1.BackColor = x2.BackColor = x3.BackColor = y1.BackColor = y2.BackColor = y3.BackColor = z1.BackColor = z2.BackColor = z3.BackColor = Color.White;
+            Buttons.ForEach(btn =>
+            {
+                btn.Enabled = true;
+                btn.BackColor = Color.White;
+                btn.Text = string.Empty;
+            });
             if (CPUTrun) ChoosePostion(new TicBtn());
         }
         private void Reset()
