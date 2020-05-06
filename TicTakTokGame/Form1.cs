@@ -228,18 +228,24 @@ namespace TicTakTokGame
         private Control CPUDecesion()
         {
             var _ctrlId = string.Empty;
-            var _pred = WinMoveForCPU();
-            if (_pred > 0)
+            var _cpuWin = WinMoveForCPU();
+            var _playerWin = IsPlayerWinning();
+            if (_cpuWin > 0)
             {
-                _ctrlId = Btns.Where(b => b.Key == _pred).Select(v => v.Value).FirstOrDefault();
-                if (CheckValidPostion(_ctrlId))
-                {
-                    return Buttons.Where(b => b.Name == _ctrlId).FirstOrDefault();
-                }
-                else
-                {
-                    return PickPostion();
-                }
+                _ctrlId = Btns.Where(b => b.Key == _cpuWin).Select(v => v.Value).FirstOrDefault();
+                //if (CheckValidPostion(_ctrlId))
+                //{
+                return Buttons.Where(b => b.Name == _ctrlId).FirstOrDefault();
+                //}
+                //else
+                //{
+                //    return PickPostion();
+                //}
+            }
+            else if (_playerWin > 0)
+            {
+                _ctrlId = Btns.Where(b => b.Key == _playerWin).Select(v => v.Value).FirstOrDefault();
+                return Buttons.Where(b => b.Name == _ctrlId).FirstOrDefault();
             }
             else
             {
@@ -315,7 +321,7 @@ namespace TicTakTokGame
             {
                 return 5;
             }
-            else if (Xs.Contains("y2") && Xs.Contains("x1") && string.IsNullOrEmpty(y3.Text))
+            else if (Xs.Contains("y2") && Xs.Contains("y1") && string.IsNullOrEmpty(y3.Text))
             {
                 return 6;
             }
@@ -426,7 +432,7 @@ namespace TicTakTokGame
             switch (type)
             {
                 case "move":
-                    soundPlayer = new SoundPlayer(baseSoundPath+"");
+                    soundPlayer = new SoundPlayer(baseSoundPath + "");
                     break;
                 default:
                     break;
@@ -435,13 +441,134 @@ namespace TicTakTokGame
         }
         private bool IsCornerMove(ref string btnName)
         {
-            var cornerPostions = new string[4] { "x1","x3","z1","z3"};
+            var cornerPostions = new string[4] { "x1", "x3", "z1", "z3" };
 
             foreach (var postion in cornerPostions)
             {
                 if (Buttons.Any(b => b.Name == postion && b.Enabled && string.IsNullOrEmpty(b.Text))) { btnName = postion; return true; };
             }
             return false;
+        }
+        private int IsPlayerWinning()
+        {
+            var Os = new List<string>();
+            Buttons.ForEach(btn =>
+            {
+                if (btn.Text == "O") Os.Add(btn.Name);
+            });
+
+            #region Raws
+            //X Raw
+            if (Os.Contains("x3") && Os.Contains("x2") && string.IsNullOrEmpty(x1.Text))
+            {
+                return 1;
+            }
+            else if (Os.Contains("x3") && Os.Contains("x1") && string.IsNullOrEmpty(x2.Text))
+            {
+                return 2;
+            }
+            else if (Os.Contains("x1") && Os.Contains("x2") && string.IsNullOrEmpty(x3.Text))
+            {
+                return 3;
+            }
+            //Y raw
+            else if (Os.Contains("y3") && Os.Contains("y2") && string.IsNullOrEmpty(y1.Text))
+            {
+                return 4;
+            }
+            else if (Os.Contains("y3") && Os.Contains("y1") && string.IsNullOrEmpty(y2.Text))
+            {
+                return 5;
+            }
+            else if (Os.Contains("y2") && Os.Contains("y1") && string.IsNullOrEmpty(y3.Text))
+            {
+                return 6;
+            }
+            //Z raw
+            else if (Os.Contains("z3") && Os.Contains("z2") && string.IsNullOrEmpty(z1.Text))
+            {
+                return 7;
+            }
+            else if (Os.Contains("z3") && Os.Contains("z1") && string.IsNullOrEmpty(z2.Text))
+            {
+                return 8;
+            }
+            else if (Os.Contains("z2") && Os.Contains("z1") && string.IsNullOrEmpty(z3.Text))
+            {
+                return 9;
+            }
+            #endregion
+            #region Cols
+            //Col 1
+            else if (Os.Contains("x1") && Os.Contains("y1") && string.IsNullOrEmpty(z1.Text))
+            {
+                return 7;
+            }
+            else if (Os.Contains("z1") && Os.Contains("x1") && string.IsNullOrEmpty(y1.Text))
+            {
+                return 4;
+            }
+            else if (Os.Contains("z1") && Os.Contains("y1") && string.IsNullOrEmpty(x1.Text))
+            {
+                return 1;
+            }
+            //col 2
+            else if (Os.Contains("x2") && Os.Contains("z2") && string.IsNullOrEmpty(y2.Text))
+            {
+                return 5;
+            }
+            else if (Os.Contains("x2") && Os.Contains("y2") && string.IsNullOrEmpty(z2.Text))
+            {
+                return 8;
+            }
+            else if (Os.Contains("z2") && Os.Contains("y2") && string.IsNullOrEmpty(x2.Text))
+            {
+                return 2;
+            }
+            //col 3
+            else if (Os.Contains("z3") && Os.Contains("x3") && string.IsNullOrEmpty(y3.Text))
+            {
+                return 6;
+            }
+            else if (Os.Contains("z3") && Os.Contains("y3") && string.IsNullOrEmpty(x3.Text))
+            {
+                return 3;
+            }
+            else if (Os.Contains("x3") && Os.Contains("y3") && string.IsNullOrEmpty(z3.Text))
+            {
+                return 9;
+            }
+            #endregion
+            #region Diagonal
+            //Diagonal One
+            else if (Os.Contains("z3") && Os.Contains("y2") && string.IsNullOrEmpty(x1.Text))
+            {
+                return 1;
+            }
+            else if (Os.Contains("z3") && Os.Contains("x1") && string.IsNullOrEmpty(y2.Text))
+            {
+                return 5;
+            }
+            else if (Os.Contains("x1") && Os.Contains("y2") && string.IsNullOrEmpty(z3.Text))
+            {
+                return 9;
+            }
+            //Diagonal Two
+            else if (Os.Contains("x3") && Os.Contains("y2") && string.IsNullOrEmpty(z1.Text))
+            {
+                return 7;
+            }
+            else if (Os.Contains("z1") && Os.Contains("x3") && string.IsNullOrEmpty(y2.Text))
+            {
+                return 5;
+            }
+            else if (Os.Contains("z1") && Os.Contains("y2") && string.IsNullOrEmpty(x3.Text))
+            {
+                return 3;
+            }
+            #endregion
+
+            return -1;
         }
         #endregion
     }
@@ -451,5 +578,10 @@ namespace TicTakTokGame
         public System.Windows.Forms.Button button { get; set; }
         public string Postion { get; set; }
         public string Player { get; set; }
+    }
+
+    public class TicTacToeEngine
+    {
+
     }
 }
