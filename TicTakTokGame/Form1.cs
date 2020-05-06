@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Media;
+using System.IO;
 
 namespace TicTakTokGame
 {
@@ -17,10 +19,8 @@ namespace TicTakTokGame
         {
             InitializeComponent();
             FillAllButtons();
-            Buttons.Reverse();
             Btns = new Dictionary<int, string>();
             Buttons.ForEach(btn => { Btns.Add(Buttons.IndexOf(btn) + 1, btn.Name); });
-
             Reset();
         }
         #endregion
@@ -34,7 +34,6 @@ namespace TicTakTokGame
         public bool CPUTrun { get; set; }
         public Dictionary<int, string> Btns { get; set; }
         private int Postion { get; set; }
-
         private List<Button> Buttons { get; set; }
         #endregion
 
@@ -249,15 +248,23 @@ namespace TicTakTokGame
         }
         private Control PickPostion()
         {
-            var _postion = ++Postion;
-            var _ctrlId = Btns.Where(b => b.Key == _postion).Select(v => v.Value).FirstOrDefault();
-            if (CheckValidPostion(_ctrlId))
+            var cornerPostion = string.Empty;
+            if (IsCornerMove(ref cornerPostion))
             {
-                return Buttons.Where(b => b.Name == _ctrlId).FirstOrDefault();
+                return Buttons.Where(b => b.Name == cornerPostion).FirstOrDefault();
             }
             else
             {
-                return PickPostion();
+                var _postion = ++Postion;
+                var _ctrlId = Btns.Where(b => b.Key == _postion).Select(v => v.Value).FirstOrDefault();
+                if (CheckValidPostion(_ctrlId))
+                {
+                    return Buttons.Where(b => b.Name == _ctrlId).FirstOrDefault();
+                }
+                else
+                {
+                    return PickPostion();
+                }
             }
         }
         private bool CheckValidPostion(string postion)
@@ -398,11 +405,10 @@ namespace TicTakTokGame
 
             return -1;
         }
-
         private void FillAllButtons()
         {
             Buttons = new List<Button>();
-            // Add Global property for all buttons control
+            // Add to the Global property all buttons control
             foreach (var control in this.FindForm().Controls)
             {
                 var _btn = control as Control;
@@ -411,6 +417,31 @@ namespace TicTakTokGame
                     if ((_btn.Name.StartsWith("x") || _btn.Name.StartsWith("y") || _btn.Name.StartsWith("z")) && _btn.Name.Length == 2) Buttons.Add(_btn as Button);
                 }
             }
+            Buttons.Reverse();
+        }
+        private void SoundPlayer(string type)
+        {
+            var baseSoundPath = AppDomain.CurrentDomain.BaseDirectory + "sounds";
+            SoundPlayer soundPlayer = new SoundPlayer();
+            switch (type)
+            {
+                case "move":
+                    soundPlayer = new SoundPlayer(baseSoundPath+"");
+                    break;
+                default:
+                    break;
+            }
+            soundPlayer.Play();
+        }
+        private bool IsCornerMove(ref string btnName)
+        {
+            var cornerPostions = new string[4] { "x1","x3","z1","z3"};
+
+            foreach (var postion in cornerPostions)
+            {
+                if (Buttons.Any(b => b.Name == postion && b.Enabled && string.IsNullOrEmpty(b.Text))) { btnName = postion; return true; };
+            }
+            return false;
         }
         #endregion
     }
