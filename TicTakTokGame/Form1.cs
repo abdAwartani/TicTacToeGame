@@ -35,6 +35,7 @@ namespace TicTakTokGame
         public Dictionary<int, string> Btns { get; set; }
         private int Postion { get; set; }
         private List<Button> Buttons { get; set; }
+        private bool OBegin { get; set; }
         #endregion
 
         #region Events
@@ -101,6 +102,7 @@ namespace TicTakTokGame
         #region Methods
         private void ChoosePostion(TicBtn ticBtn)
         {
+            if (BtnCounter == 0) OBegin = Oplayer;
             BtnCounter++;
             var _Winner = string.Empty;
             if (IsCPU && CPUTrun)
@@ -140,14 +142,22 @@ namespace TicTakTokGame
             if (BtnCounter == 8)
             {
                 MessageBox.Show("Draw !");
-                ContinueGame();
+                ContinueGame(true);
             }
             if (IsCPU && CPUTrun) ChoosePostion(new TicBtn());
         }
-        private void ContinueGame()
+        private void ContinueGame(bool draw = false)
         {
             BtnCounter = 0;
-            Oplayer = OPlayerCounter > XPlayerCounter ? true : false;
+            if (draw && OPlayerCounter == XPlayerCounter)
+            {
+                Oplayer = !OBegin;
+            }
+            else
+            {
+                Oplayer = OPlayerCounter > XPlayerCounter ? true : false;
+            }
+            
             CPUTrun = !IsCPU ? false : !Oplayer;
             lblTurnPlayer.Text = Oplayer ? "O Player" : "X Player";
             Buttons.ForEach(btn =>
@@ -163,7 +173,7 @@ namespace TicTakTokGame
             CPUTrun = false;
             IsCPU = false;
             BtnCounter = 0;
-            Oplayer = true;
+            OBegin = Oplayer = true;
             lblO.Text = "0";
             lblX.Text = "0";
             lblTurnPlayer.Text = Oplayer ? "O Player" : "X Player";
@@ -228,19 +238,12 @@ namespace TicTakTokGame
         private Control CPUDecesion()
         {
             var _ctrlId = string.Empty;
-            var _cpuWin = WinMoveForCPU();
-            var _playerWin = IsPlayerWinning();
+            var _cpuWin = WinAndDefForCPU(true);
+            var _playerWin = WinAndDefForCPU(false);
             if (_cpuWin > 0)
             {
                 _ctrlId = Btns.Where(b => b.Key == _cpuWin).Select(v => v.Value).FirstOrDefault();
-                //if (CheckValidPostion(_ctrlId))
-                //{
                 return Buttons.Where(b => b.Name == _ctrlId).FirstOrDefault();
-                //}
-                //else
-                //{
-                //    return PickPostion();
-                //}
             }
             else if (_playerWin > 0)
             {
@@ -290,127 +293,6 @@ namespace TicTakTokGame
                 twoPlayer.BackColor = Color.Green;
             }
         }
-        private int WinMoveForCPU()
-        {
-            var Xs = new List<string>();
-            Buttons.ForEach(btn =>
-            {
-                if (btn.Text == "X") Xs.Add(btn.Name);
-            });
-
-            #region Raws
-            //X Raw
-            if (Xs.Contains("x3") && Xs.Contains("x2") && string.IsNullOrEmpty(x1.Text))
-            {
-                return 1;
-            }
-            else if (Xs.Contains("x3") && Xs.Contains("x1") && string.IsNullOrEmpty(x2.Text))
-            {
-                return 2;
-            }
-            else if (Xs.Contains("x1") && Xs.Contains("x2") && string.IsNullOrEmpty(x3.Text))
-            {
-                return 3;
-            }
-            //Y raw
-            else if (Xs.Contains("y3") && Xs.Contains("y2") && string.IsNullOrEmpty(y1.Text))
-            {
-                return 4;
-            }
-            else if (Xs.Contains("y3") && Xs.Contains("y1") && string.IsNullOrEmpty(y2.Text))
-            {
-                return 5;
-            }
-            else if (Xs.Contains("y2") && Xs.Contains("y1") && string.IsNullOrEmpty(y3.Text))
-            {
-                return 6;
-            }
-            //Z raw
-            else if (Xs.Contains("z3") && Xs.Contains("z2") && string.IsNullOrEmpty(z1.Text))
-            {
-                return 7;
-            }
-            else if (Xs.Contains("z3") && Xs.Contains("z1") && string.IsNullOrEmpty(z2.Text))
-            {
-                return 8;
-            }
-            else if (Xs.Contains("z2") && Xs.Contains("z1") && string.IsNullOrEmpty(z3.Text))
-            {
-                return 9;
-            }
-            #endregion
-            #region Cols
-            //Col 1
-            else if (Xs.Contains("x1") && Xs.Contains("y1") && string.IsNullOrEmpty(z1.Text))
-            {
-                return 7;
-            }
-            else if (Xs.Contains("z1") && Xs.Contains("x1") && string.IsNullOrEmpty(y1.Text))
-            {
-                return 4;
-            }
-            else if (Xs.Contains("z1") && Xs.Contains("y1") && string.IsNullOrEmpty(x1.Text))
-            {
-                return 1;
-            }
-            //col 2
-            else if (Xs.Contains("x2") && Xs.Contains("z2") && string.IsNullOrEmpty(y2.Text))
-            {
-                return 5;
-            }
-            else if (Xs.Contains("x2") && Xs.Contains("y2") && string.IsNullOrEmpty(z2.Text))
-            {
-                return 8;
-            }
-            else if (Xs.Contains("z2") && Xs.Contains("y2") && string.IsNullOrEmpty(x2.Text))
-            {
-                return 2;
-            }
-            //col 3
-            else if (Xs.Contains("z3") && Xs.Contains("x3") && string.IsNullOrEmpty(y3.Text))
-            {
-                return 6;
-            }
-            else if (Xs.Contains("z3") && Xs.Contains("y3") && string.IsNullOrEmpty(x3.Text))
-            {
-                return 3;
-            }
-            else if (Xs.Contains("x3") && Xs.Contains("y3") && string.IsNullOrEmpty(z3.Text))
-            {
-                return 9;
-            }
-            #endregion
-            #region Diagonal
-            //Diagonal One
-            else if (Xs.Contains("z3") && Xs.Contains("y2") && string.IsNullOrEmpty(x1.Text))
-            {
-                return 1;
-            }
-            else if (Xs.Contains("z3") && Xs.Contains("x1") && string.IsNullOrEmpty(y2.Text))
-            {
-                return 5;
-            }
-            else if (Xs.Contains("x1") && Xs.Contains("y2") && string.IsNullOrEmpty(z3.Text))
-            {
-                return 9;
-            }
-            //Diagonal Two
-            else if (Xs.Contains("x3") && Xs.Contains("y2") && string.IsNullOrEmpty(z1.Text))
-            {
-                return 7;
-            }
-            else if (Xs.Contains("z1") && Xs.Contains("x3") && string.IsNullOrEmpty(y2.Text))
-            {
-                return 5;
-            }
-            else if (Xs.Contains("z1") && Xs.Contains("y2") && string.IsNullOrEmpty(x3.Text))
-            {
-                return 3;
-            }
-            #endregion
-
-            return -1;
-        }
         private void FillAllButtons()
         {
             Buttons = new List<Button>();
@@ -449,120 +331,131 @@ namespace TicTakTokGame
             }
             return false;
         }
-        private int IsPlayerWinning()
+        private int WinAndDefForCPU(bool isWinMove)
         {
-            var Os = new List<string>();
-            Buttons.ForEach(btn =>
+            var moves = new List<string>();
+            if (isWinMove)
             {
-                if (btn.Text == "O") Os.Add(btn.Name);
-            });
+                Buttons.ForEach(btn =>
+                {
+                    if (btn.Text == "X") moves.Add(btn.Name);
+                });
+            }
+            else
+            {
+                Buttons.ForEach(btn =>
+                {
+                    if (btn.Text == "O") moves.Add(btn.Name);
+                });
+            }
+           
 
             #region Raws
             //X Raw
-            if (Os.Contains("x3") && Os.Contains("x2") && string.IsNullOrEmpty(x1.Text))
+            if (moves.Contains("x3") && moves.Contains("x2") && string.IsNullOrEmpty(x1.Text))
             {
                 return 1;
             }
-            else if (Os.Contains("x3") && Os.Contains("x1") && string.IsNullOrEmpty(x2.Text))
+            else if (moves.Contains("x3") && moves.Contains("x1") && string.IsNullOrEmpty(x2.Text))
             {
                 return 2;
             }
-            else if (Os.Contains("x1") && Os.Contains("x2") && string.IsNullOrEmpty(x3.Text))
+            else if (moves.Contains("x1") && moves.Contains("x2") && string.IsNullOrEmpty(x3.Text))
             {
                 return 3;
             }
             //Y raw
-            else if (Os.Contains("y3") && Os.Contains("y2") && string.IsNullOrEmpty(y1.Text))
+            else if (moves.Contains("y3") && moves.Contains("y2") && string.IsNullOrEmpty(y1.Text))
             {
                 return 4;
             }
-            else if (Os.Contains("y3") && Os.Contains("y1") && string.IsNullOrEmpty(y2.Text))
+            else if (moves.Contains("y3") && moves.Contains("y1") && string.IsNullOrEmpty(y2.Text))
             {
                 return 5;
             }
-            else if (Os.Contains("y2") && Os.Contains("y1") && string.IsNullOrEmpty(y3.Text))
+            else if (moves.Contains("y2") && moves.Contains("y1") && string.IsNullOrEmpty(y3.Text))
             {
                 return 6;
             }
             //Z raw
-            else if (Os.Contains("z3") && Os.Contains("z2") && string.IsNullOrEmpty(z1.Text))
+            else if (moves.Contains("z3") && moves.Contains("z2") && string.IsNullOrEmpty(z1.Text))
             {
                 return 7;
             }
-            else if (Os.Contains("z3") && Os.Contains("z1") && string.IsNullOrEmpty(z2.Text))
+            else if (moves.Contains("z3") && moves.Contains("z1") && string.IsNullOrEmpty(z2.Text))
             {
                 return 8;
             }
-            else if (Os.Contains("z2") && Os.Contains("z1") && string.IsNullOrEmpty(z3.Text))
+            else if (moves.Contains("z2") && moves.Contains("z1") && string.IsNullOrEmpty(z3.Text))
             {
                 return 9;
             }
             #endregion
             #region Cols
             //Col 1
-            else if (Os.Contains("x1") && Os.Contains("y1") && string.IsNullOrEmpty(z1.Text))
+            else if (moves.Contains("x1") && moves.Contains("y1") && string.IsNullOrEmpty(z1.Text))
             {
                 return 7;
             }
-            else if (Os.Contains("z1") && Os.Contains("x1") && string.IsNullOrEmpty(y1.Text))
+            else if (moves.Contains("z1") && moves.Contains("x1") && string.IsNullOrEmpty(y1.Text))
             {
                 return 4;
             }
-            else if (Os.Contains("z1") && Os.Contains("y1") && string.IsNullOrEmpty(x1.Text))
+            else if (moves.Contains("z1") && moves.Contains("y1") && string.IsNullOrEmpty(x1.Text))
             {
                 return 1;
             }
             //col 2
-            else if (Os.Contains("x2") && Os.Contains("z2") && string.IsNullOrEmpty(y2.Text))
+            else if (moves.Contains("x2") && moves.Contains("z2") && string.IsNullOrEmpty(y2.Text))
             {
                 return 5;
             }
-            else if (Os.Contains("x2") && Os.Contains("y2") && string.IsNullOrEmpty(z2.Text))
+            else if (moves.Contains("x2") && moves.Contains("y2") && string.IsNullOrEmpty(z2.Text))
             {
                 return 8;
             }
-            else if (Os.Contains("z2") && Os.Contains("y2") && string.IsNullOrEmpty(x2.Text))
+            else if (moves.Contains("z2") && moves.Contains("y2") && string.IsNullOrEmpty(x2.Text))
             {
                 return 2;
             }
             //col 3
-            else if (Os.Contains("z3") && Os.Contains("x3") && string.IsNullOrEmpty(y3.Text))
+            else if (moves.Contains("z3") && moves.Contains("x3") && string.IsNullOrEmpty(y3.Text))
             {
                 return 6;
             }
-            else if (Os.Contains("z3") && Os.Contains("y3") && string.IsNullOrEmpty(x3.Text))
+            else if (moves.Contains("z3") && moves.Contains("y3") && string.IsNullOrEmpty(x3.Text))
             {
                 return 3;
             }
-            else if (Os.Contains("x3") && Os.Contains("y3") && string.IsNullOrEmpty(z3.Text))
+            else if (moves.Contains("x3") && moves.Contains("y3") && string.IsNullOrEmpty(z3.Text))
             {
                 return 9;
             }
             #endregion
             #region Diagonal
             //Diagonal One
-            else if (Os.Contains("z3") && Os.Contains("y2") && string.IsNullOrEmpty(x1.Text))
+            else if (moves.Contains("z3") && moves.Contains("y2") && string.IsNullOrEmpty(x1.Text))
             {
                 return 1;
             }
-            else if (Os.Contains("z3") && Os.Contains("x1") && string.IsNullOrEmpty(y2.Text))
+            else if (moves.Contains("z3") && moves.Contains("x1") && string.IsNullOrEmpty(y2.Text))
             {
                 return 5;
             }
-            else if (Os.Contains("x1") && Os.Contains("y2") && string.IsNullOrEmpty(z3.Text))
+            else if (moves.Contains("x1") && moves.Contains("y2") && string.IsNullOrEmpty(z3.Text))
             {
                 return 9;
             }
             //Diagonal Two
-            else if (Os.Contains("x3") && Os.Contains("y2") && string.IsNullOrEmpty(z1.Text))
+            else if (moves.Contains("x3") && moves.Contains("y2") && string.IsNullOrEmpty(z1.Text))
             {
                 return 7;
             }
-            else if (Os.Contains("z1") && Os.Contains("x3") && string.IsNullOrEmpty(y2.Text))
+            else if (moves.Contains("z1") && moves.Contains("x3") && string.IsNullOrEmpty(y2.Text))
             {
                 return 5;
             }
-            else if (Os.Contains("z1") && Os.Contains("y2") && string.IsNullOrEmpty(x3.Text))
+            else if (moves.Contains("z1") && moves.Contains("y2") && string.IsNullOrEmpty(x3.Text))
             {
                 return 3;
             }
@@ -572,16 +465,10 @@ namespace TicTakTokGame
         }
         #endregion
     }
-
     public class TicBtn
     {
         public System.Windows.Forms.Button button { get; set; }
         public string Postion { get; set; }
         public string Player { get; set; }
-    }
-
-    public class TicTacToeEngine
-    {
-
     }
 }
