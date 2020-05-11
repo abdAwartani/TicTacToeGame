@@ -10,12 +10,12 @@ using System.Windows.Forms;
 using System.Media;
 using System.IO;
 
-namespace TicTakTokGame
+namespace TicTacToeGame
 {
-    public partial class Form1 : Form
+    public partial class GameForm : Form
     {
         #region Constructor
-        public Form1()
+        public GameForm()
         {
             InitializeComponent();
             FillAllButtons();
