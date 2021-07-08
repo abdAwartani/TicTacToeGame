@@ -104,38 +104,38 @@ namespace TicTacToeGame
         {
             if (BtnCounter == 0) OBegin = Oplayer;
             BtnCounter++;
-            var _Winner = string.Empty;
+            var winner = string.Empty;
             if (IsCPU && CPUTrun)
             {
                 Postion = 0;
                 var button = CPUDecesion();
-                button.Text = Oplayer ? "O" : "X";
+                button.Text = Oplayer ? Player.O.ToString() : Player.X.ToString();
                 button.BackColor = Oplayer ? Color.Blue : Color.Green;
                 button.Enabled = false;
             }
             else
             {
-                ticBtn.button.Text = Oplayer ? "O" : "X";
+                ticBtn.button.Text = Oplayer ? Player.O.ToString() : Player.X.ToString();
                 ticBtn.button.BackColor = Oplayer ? Color.Blue : Color.Green;
                 ticBtn.button.Enabled = false;
             }
             if (IsCPU) CPUTrun = !CPUTrun;
             Oplayer = !Oplayer;
             lblTurnPlayer.Text = Oplayer ? "O Player" : "X Player";
-            _Winner = EvaluateWinner();
-            if (!string.IsNullOrWhiteSpace(_Winner))
+            winner = EvaluateWinner();
+            if (!string.IsNullOrWhiteSpace(winner))
             {
-                if (_Winner == "O")
+                if (winner == Player.O.ToString())
                 {
                     OPlayerCounter++;
-                    lblO.Text = WinCounter("O");
+                    lblO.Text = WinCounter(Player.O);
                 }
                 else
                 {
                     XPlayerCounter++;
-                    lblX.Text = WinCounter("X");
+                    lblX.Text = WinCounter(Player.X);
                 }
-                MessageBox.Show($"Player {_Winner} Wins!");
+                MessageBox.Show($"Player {winner} Wins!");
                 ContinueGame();
             }
 
@@ -182,15 +182,15 @@ namespace TicTacToeGame
             x1.BackColor = x2.BackColor = x3.BackColor = y1.BackColor = y2.BackColor = y3.BackColor = z1.BackColor = z2.BackColor = z3.BackColor = Color.White;
             PlayerMode();
         }
-        private string WinCounter(string player)
+        private string WinCounter(Player player)
         {
             string _counter = string.Empty;
             switch (player)
             {
-                case "X":
+                case Player.X:
                     _counter = XPlayerCounter + " Wins";
                     break;
-                case "O":
+                case Player.O:
                     _counter = OPlayerCounter + " Wins";
                     break;
             }
@@ -198,42 +198,44 @@ namespace TicTacToeGame
         }
         private string EvaluateWinner()
         {
-            string _winner = string.Empty;
+            string winner = string.Empty;
 
-            if (x1.Text == x2.Text && x1.Text == x3.Text)
+            //win moves x1x2x3-y1y2y3-z1z2z3
+            //   index  036-147-258
+            //          x1y1z1-x2y2z2-x3y3z3
+            //          012-345-678
+            //          x1y2z3-x3y2z1
+            //          048-642
+
+            var lstO = Buttons.Where(p => p.Text == Player.O.ToString()).Select(b=> Buttons.IndexOf(b).ToString()).ToList();
+            var lstX = Buttons.Where(p => p.Text == Player.X.ToString()).Select(b => Buttons.IndexOf(b).ToString()).ToList();
+
+            var lstWinMovs = new List<string>()
             {
-                _winner = x1.Text;
-            }
-            else if (y1.Text == y2.Text && y1.Text == y3.Text)
+                "036","147","258","012","345","678","048","642"
+            };
+            var isOWinning = false;
+            var isXwinning = false;
+
+
+            foreach (var mov in lstWinMovs)
             {
-                _winner = y1.Text;
-            }
-            else if (z1.Text == z2.Text && z1.Text == z3.Text)
-            {
-                _winner = z1.Text;
-            }
-            else if (x1.Text == y1.Text && y1.Text == z1.Text)
-            {
-                _winner = x1.Text;
-            }
-            else if (x2.Text == y2.Text && y2.Text == z2.Text)
-            {
-                _winner = x2.Text;
-            }
-            else if (x3.Text == y3.Text && y3.Text == z3.Text)
-            {
-                _winner = x3.Text;
-            }
-            else if (x1.Text == y2.Text && y2.Text == z3.Text)
-            {
-                _winner = x1.Text;
-            }
-            else if (x3.Text == y2.Text && y2.Text == z1.Text)
-            {
-                _winner = x3.Text;
+                isOWinning = mov.All(m => lstO.Contains(m.ToString()));
+                isXwinning = mov.All(m => lstX.Contains(m.ToString()));
+
+                if (isXwinning | isOWinning) break;
             }
 
-            return _winner;
+            if (isOWinning)
+            {
+                winner = Player.O.ToString();
+            }
+            else if(isXwinning)
+            {
+                winner = Player.X.ToString();
+            }
+
+            return winner;
         }
         private Control CPUDecesion()
         {
@@ -338,14 +340,14 @@ namespace TicTacToeGame
             {
                 Buttons.ForEach(btn =>
                 {
-                    if (btn.Text == "X") moves.Add(btn.Name);
+                    if (btn.Text == Player.X.ToString()) moves.Add(btn.Name);
                 });
             }
             else
             {
                 Buttons.ForEach(btn =>
                 {
-                    if (btn.Text == "O") moves.Add(btn.Name);
+                    if (btn.Text == Player.O.ToString()) moves.Add(btn.Name);
                 });
             }
            
@@ -470,5 +472,9 @@ namespace TicTacToeGame
         public System.Windows.Forms.Button button { get; set; }
         public string Postion { get; set; }
         public string Player { get; set; }
+    }
+    public enum Player{
+        O=0,
+        X=1
     }
 }
