@@ -36,10 +36,16 @@ namespace TicTacToeGame
         private int Postion { get; set; }
         private List<Button> Buttons { get; set; }
         private bool OBegin { get; set; }
+
+        private static readonly List<string> LstWinMoves = new List<string>()
+        {
+            "036","147","258","012","345","678","048","642"
+        };
+
         #endregion
 
-        #region Events
-        private void x1_Click(object sender, EventArgs e)
+    #region Events
+    private void x1_Click(object sender, EventArgs e)
         {
             ChoosePostion(HandleClick(sender));
         }
@@ -102,27 +108,28 @@ namespace TicTacToeGame
         #region Methods
         private void ChoosePostion(TicBtn ticBtn)
         {
+            var winner = string.Empty;
+            Control button;
+
             if (BtnCounter == 0) OBegin = Oplayer;
             BtnCounter++;
-            var winner = string.Empty;
+         
             if (IsCPU && CPUTrun)
             {
                 Postion = 0;
-                var button = CPUDecesion();
-                button.Text = Oplayer ? Player.O.ToString() : Player.X.ToString();
-                button.BackColor = Oplayer ? Color.Blue : Color.Green;
-                button.Enabled = false;
+                button = CpuDecesion();
             }
             else
-            {
-                ticBtn.button.Text = Oplayer ? Player.O.ToString() : Player.X.ToString();
-                ticBtn.button.BackColor = Oplayer ? Color.Blue : Color.Green;
-                ticBtn.button.Enabled = false;
-            }
-            if (IsCPU) CPUTrun = !CPUTrun;
-            Oplayer = !Oplayer;
+                button = ticBtn.button;
+
+            MarkPostion(button);
+
+            SwitchTurn();
+
             lblTurnPlayer.Text = Oplayer ? "O Player" : "X Player";
+
             winner = EvaluateWinner();
+
             if (!string.IsNullOrWhiteSpace(winner))
             {
                 if (winner == Player.O.ToString())
@@ -145,6 +152,17 @@ namespace TicTacToeGame
                 ContinueGame(true);
             }
             if (IsCPU && CPUTrun) ChoosePostion(new TicBtn());
+        }
+        private void MarkPostion(Control button)
+        {
+            button.Text = Oplayer ? Player.O.ToString() : Player.X.ToString();
+            button.BackColor = Oplayer ? Color.Blue : Color.Green;
+            button.Enabled = false;
+        }
+        private void SwitchTurn()
+        {
+            if (IsCPU) CPUTrun = !CPUTrun;
+            Oplayer = !Oplayer;
         }
         private void ContinueGame(bool draw = false)
         {
@@ -210,34 +228,31 @@ namespace TicTacToeGame
             var lstO = Buttons.Where(p => p.Text == Player.O.ToString()).Select(b=> Buttons.IndexOf(b).ToString()).ToList();
             var lstX = Buttons.Where(p => p.Text == Player.X.ToString()).Select(b => Buttons.IndexOf(b).ToString()).ToList();
 
-            var lstWinMovs = new List<string>()
-            {
-                "036","147","258","012","345","678","048","642"
-            };
+           
             var isOWinning = false;
-            var isXwinning = false;
+            var isXWinning = false;
 
 
-            foreach (var mov in lstWinMovs)
+            foreach (var mov in LstWinMoves)
             {
                 isOWinning = mov.All(m => lstO.Contains(m.ToString()));
-                isXwinning = mov.All(m => lstX.Contains(m.ToString()));
+                isXWinning = mov.All(m => lstX.Contains(m.ToString()));
 
-                if (isXwinning | isOWinning) break;
+                if (isXWinning | isOWinning) break;
             }
 
             if (isOWinning)
             {
                 winner = Player.O.ToString();
             }
-            else if(isXwinning)
+            else if(isXWinning)
             {
                 winner = Player.X.ToString();
             }
 
             return winner;
         }
-        private Control CPUDecesion()
+        private Control CpuDecesion()
         {
             var _ctrlId = string.Empty;
             var _cpuWin = WinAndDefForCPU(true);
